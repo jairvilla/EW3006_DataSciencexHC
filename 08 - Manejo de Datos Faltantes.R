@@ -77,6 +77,14 @@ df2
 df[!complete.cases(df), ] # con ! obtiene los caso incompletos   
 
 
+# revisar NA y missing values
+
+numberOfNA = length(which(is.na(dataset)==T))
+if(numberOfNA > 0) {
+  cat('Number of missing values found: ', numberOfNA)
+  cat('\nRemoving missing values...')
+  trainingSet = dataset[complete.cases(dataset), ]
+}
 
 
 
