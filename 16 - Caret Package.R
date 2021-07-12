@@ -1,10 +1,13 @@
 
+# Tema: Caret package for GLM model 
+# Objetivo: Implementar un modelo de prediccion de spam usando el 
+#           modelo GLM con el package caret. 
+
 # Librarias ----
-library(AppliedPredictiveModeling); library(caret); library(kernlab)
+library(caret); library(kernlab)
 
 # Data ----
-data(spam); data(AlzheimerDisease)
-dim(AlzheimerDisease)
+data(spam)
 
 # Descripción de la data ----
 str(spam)
@@ -39,8 +42,7 @@ table(prediccion)
 
 # Métricas ---- 
 # Qué tan bien predice el modelo?
- 
-confusionMatrix(prediccion, testing$type)
+ confusionMatrix(prediccion, testing$type)
 
 
 
