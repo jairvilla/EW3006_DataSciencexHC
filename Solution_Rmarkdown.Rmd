@@ -1,0 +1,25 @@
+---
+title: "R-markdown"
+author: "Jair Villanueva P."
+date: "7/9/2021"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Pasos para el R-markdown:
+Instalar de la pagina de Miktek de Latex:<https://miktex.org/>.
+
+### Instalar paquete "tinytex" 
+tinytex::install_tinytex()
+```{r tiny}
+install.packages("tinytex")
+```
+
+## Solucion si sale un error:
+```{r , echo=FALSE}
+tinytex::install_tinytex()
+```
+
