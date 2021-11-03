@@ -1,0 +1,243 @@
+---
+title: "Features Selection"
+author: "Jair Villanueva P."
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+
+#### Selección de Caracteristicas (FS)
+
+**Definición:** FS es el proceso de selección automático o manual de las características/atributos más relevantes para el modelado que contribuyen a la varaibles de predicciòn o al resultado que nos interesa. 
+
+**FS para el análisis de datos permite:**
+
+  + mejorar la calidad de los modelos de aprendizaje automático supervisados y no supervisados,
+
+  + Elimina las caracteristicas irrelevantes o redundantes del dataset.
+
+  + Reduce la dimensionalidad de los datos
+  
+
+#### Pasos para relizar FS en un dataset:
+
+**Paso 1: Exploración del dataset** 
+**1.0** Cargar librerías
+```{r setup, include = FALSE}
+library(caret)
+library(ggplot2)
+library(corrplot)
+library(tidyverse)
+library(dplyr)
+library(readr)
+```
+
+**1.1** Cargar la dataset
+
+```` {r}
+data(diabetes)
+getwd()
+# setwd("C:/Users/jvill/Desktop/DATA-SCIENCE/1- CourseDS_2020/2-CaseStudies/BinaryClassification/data")
+# dataset <- read.delim("C:/Users/jvill/Desktop/DATA-SCIENCE/1- CourseDS_2020/2-CaseStudies/BinaryClassification/diabetes.csv")
+# diabetes <-  read.csv('dataset')
+# print(head(diabetes))
+````
+
+**1.2:**Exploramos los datos 
+
+```{r}
+summary(diabetes)  # Estadistica resumida de los datos
+dim(diabetes)      # dimesiones del dataset
+names(diabetes)    # nombre de las variables
+str(diabetes)      # identificar estructura de los datos
+```
+
+**1.3:** Identificación de NA: 
+```{r}
+which(is.na(diabetes))  # odentificar NA en el dataframe
+sum(is.na(diabetes))    # Contar NA en el dataframe
+```
+
+El dataset No contiene NA. 
+
+**Paso 2:** FS con EL Paquete "Caret"
+
+**2.1**: Eliminar predictores redundates 
+
+Los datos pueden contener predictores que están altamente correlacionados entre sí. Muchos métodos funcionan mejor si se eliminan los predictores altamente correlacionados.
+Para ello, realizaremos una matriz de correlación del dataset para identificar que variables se pueden eliminar, es decir cuales de los predictores 
+están altamente correlacionados. 
+Por regla general, se eliminan las varaibles con una correlación absoluta de 0.75 o mayor. 
+
+```{r}
+# Nos aseguramos que nuestro resultados sean repetibles
+set.seed(5464)
+names(diabetes)
+str(diabetes)
+# Medir la correlación entre dos variables 
+cor(diabetes$Age, diabetes$Insulin, use = 'complete.obs')
+
+# Teniendo en cuenta la prueba de significancia y el valor de confianza 
+cor.test(diabetes$Age, diabetes$Glucose, use = 'complete.obs')
+
+# Calculamos la matrix de correlación para todo el dataframe
+correlationMatrix <- cor(diabetes[,1:8])  # Remover el outcome
+# Resumir la matrix de correlaciòn
+print(correlationMatrix)
+# encontrar variables que están altamente correlacionas (idealmente> 0,75)
+highlyCorrelated <- findCorrelation(correlationMatrix, cutoff=0.5)
+# Nombre de la variable(s) correlacionadas
+cat("Variable(s) correlacionada(s):",colnames(diabetes[highlyCorrelated]))
+
+```
+
+Visualización entre dos variables relacionadas: 
+
+```{r}
+names(diabetes)
+qplot(x = Glucose, y = Age, data = diabetes) +
+        geom_smooth(method = "lm", se = FALSE) +
+        ggtitle("Fig. A: Asociacion positiva")
+
+
+qplot(x =SkinThickness , y = Age, data = diabetes) +
+        geom_smooth(method = "lm", se = FALSE) +
+        ggtitle("Fig. A: Asociacion positiva")
+
+# Matriz de gráficos de dispersión
+pairs(diabetes[, c(1, 1:8)])
+
+# Usando la función corrplot para  matriz de correlación (recomendada)
+
+library(corrplot)
+cor_matrix <- cor(diabetes[, c(1,1:8)], use = 'complete.obs')
+corrplot.mixed(cor_matrix,
+               lower = "circle", 
+               upper = "number",
+               tl.pos = "lt",
+               diag = "u"
+               )
+
+summary(diabetes)
+```
+
+Ranking de caracteristicas por importancias:
+
+La importancia de las características se puede estimar construye un modelo de cuantificación de vectores de aprendizaje (LVQ). Con la función varImp se utiliza  para estimar la importancia de la variable en un gráfico.
+
+
+```{r}
+set.seed(7)
+# Preparar el esquema de entrenamiento
+control <- trainControl(method="repeatedcv", number=10, repeats=3)
+names(diabetes)
+# Entrenar el modelo
+model <- train(Outcome ~., data = diabetes, 
+               method="lvq",
+               preProcess="scale",
+               trControl=control)
+# Se estima la varaibles importantes para el modelo
+importance <- varImp(model, scale=FALSE)
+# Mostrar las variables 
+print(importance)
+# plot importance
+plot(importance)
+```
+
+En la anterior grafica se muestra que glucose, BMI y Age son los 3 atributos más importantes del dataset y que el atributo de insulina es el menos importante.
+
+
+Features selection 
+
+Los métodos de selección automática de características se pueden utilizar para construir muchos modelos con diferentes subconjuntos de un conjunto de datos e identificar aquellos atributos que son y no son necesarios para construir un modelo preciso.
+
+Un método automático para la selección de características proporcionado por el paquete "Caret" R es Eliminación de características recursivas o RFE. Se utiliza el algoritmo de Random Forest en cada iteración para evaluar el modelo. El algoritmo está configurado para explorar todos los posibles subconjuntos de variables.  
+
+```{r}
+set.seed(7)
+# Definir el control usando la función de seleccion del algoritmo de RF 
+control <- rfeControl(functions= rfFuncs, method="cv", number=10)
+# correr el algortimo RFE 
+results <- rfe(diabetes[,1:8], diabetes[,9], sizes=c(1:8), rfeControl=control)
+# summarize the results
+print(results)
+results$optVariables
+
+# list the chosen features
+predictors(results)
+# plot the results
+plot(results, type=c("g", "o"))
+```
+
+
+```{r}
+# install.packages('Boruta')
+library(Boruta)
+
+trainData <- diabetes
+boruta_output <- Boruta(Outcome ~ ., data=na.omit(trainData), doTrace=0) 
+names(boruta_output)
+plot(boruta_output, cex.axis=.7, las=2, xlab="", main="Variable Importance") 
+
+```
+
+Las variables más significativas son Glucosa, BMI, Age y Pregnancies.
+
+**Métodos de Information Gain:** 
+```{r, eval= FALSE}
+install.packages("CORElearn")
+install.packages("RWeka")
+install.packages("FSelector")
+library(RWeka)
+library(FSelector)
+library(CORElearn)
+```
+
+```{r}
+IG.CORElearn <- attrEval(Outcome ~ ., data=diabetes,  estimator = "InfGain")
+IG.RWeka     <- InfoGainAttributeEval(Outcome ~ ., data = diabetes,)
+IG.FSelector <- information.gain(Outcome ~ ., data = diabetes,)
+
+IG.CORElearn
+IG.RWeka
+IG.FSelector
+```
+
+**Método Wrappers:**
+
+```{r, eval= FALSE}
+install.packages("leaps")
+library(leaps)
+library(tidyverse)
+library(caret)
+library(MASS)
+```
+
+
+```{r}
+set.seed(23423)
+
+# Entrenamos el modelo 
+full_model <- glm(Outcome ~., family = binomial, data= diabetes) #linear model 
+# Modelo Stepwise regression model: Forward
+step.model <- stepAIC(full_model, direction = "forward")
+summary(step.model)
+
+# Modelo Stepwise regression model: Backward
+step.back <- stepAIC(full_model, direction = "backward")
+summary(step.model)
+
+step.both <- stepAIC(full_model, direction = "both")
+summary(step.both)
+              
+#Nota: si el valor de direction es: i) “both” (for stepwise regression, both forward and backward selection); “backward” (for backward selection) and “forward” (for forward selection). 
+
+```
+
+
+
+
+
+
+
+
