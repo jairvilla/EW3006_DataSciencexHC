@@ -1,0 +1,234 @@
+---
+title: 'Parcial 2: Ciencia de datos en el Sector Salud'
+author: "Jair Villanueva P."
+date: "25/10/2021"
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### 2 Examen Parcial  Ciencias de Datos
+#### **Instrucciones:**
+* El parcial será desarrollado en los grupos (3 estudiantes máx.) asignados.
+* No olvide escribir los nombres completos de TODOS los integrantes
+* Cada grupo debe responder a las preguntas que están en el documento, con su respectivo código y solución. 
+* Adicional al documento (preferiblemente escrito en markdown, extension .Rmd), debe entregar el  Script con el    
+  código debidamente comentado.  
+
+### *Introdución*
+El cáncer de mama (CM) es uno de los cánceres más comunes entre las mujeres en todo el mundo, y representa la mayoría de los casos nuevos de cáncer y las muertes relacionadas con el cáncer según las estadísticas mundiales, lo que lo convierte en un problema de salud pública importante en la sociedad actual.
+El diagnóstico precoz de CM puede mejorar el pronóstico y mejorar tasa de supervivencia significativamente, ya que puede promover el tratamiento oportuno a los pacientes que lo padecen. 
+Una clasificación más precisa de los tumores benignos puede evitar que los pacientes se sometan a tratamientos innecesarios. Por tanto, el diagnóstico correcto de CM y la clasificación de los pacientes en grupos malignos o benignos es objeto de mucha investigación. 
+Teniendo en cuenta, el desarrollo de la inteligencia artificial y la aplicación de algoritmos de  aprendizaje automático (ML), la clasificación de patrones de CM y el modelado pronóstico ha permitdo la deteccion temprana cancer en sus etapas iniciales. 
+
+Los métodos de clasificación y extracción de datos son una forma eficaz de clasificar eventos adversos y son técnicas ampliamente en el diagnóstico y análisis para tomar decisiones en el sector clínico.
+
+### Pregunta de Investigación:
+
+**¿Cuáles son las variables más relevantes del  data set que permiten predecir si una mujer tiene o no cancer de mama?**
+
+
+Siga los pasos de esta guía y responda a las siguientes siguientes preguntas: 
+
+*Paso 1:* Carge las libraries que utilizará y el dataset (cancer_Breast)
+
+
+Importamos las librerias que necesitamos:
+
+```{r,  warning=FALSE, message= FALSE}
+library(caret)
+library(dplyr)
+library(ggplot2)
+library(tidyverse)
+```
+
+Importamos el data set: 
+```{r, eval= TRUE, warning=FALSE, message= FALSE}
+# file.choose() para encontrar el data set en el escritorio de trabajo
+
+cancer <- read_delim("breastCancer_parcial.csv", 
+          delim = ";", escape_double = FALSE, trim_ws = TRUE)
+cancer <- data.frame(cancer)
+```
+
+*Paso 2:* Exploración de los datos. **(+15 puntos)**
+
+```{r, eval=FALSE}
+dim(cancer)
+head(cancer, 5)
+# glimpse(cancer)
+```
+
+
+### Responder las siguientes preguntas:
+
+1. Convierte la variable *diagnosis* a una variable categorica (factor), para esto debes usar la función mutute y %>% (pipe) del package **DPLYR**. Esta variable será el outcome. 
+
+2. Cuántas pacientes y predictores tiene el data set ?  
+
+3. Realice un resumen de sus datos:
+   + El data set cuenta con datos faltantes? Cree una tabla que indique el Número de NA por cada variable, si aplica. 
+   + El data set cuenta con datos Nulos, (ceros). Cree una tabla si aplica con el conteo de estos dato nulos. 
+
+4. En una gráfica puede resumir(contar) estos valores (NA y Null). Recomendación: use ggplot2. 
+
+5. En la variable "diagnosis", asigne Maligno a valores con M y Benigno a valores con B; y conviertala nuevamente a factor. 
+
+6. ¿Cuál es el porcentaje de pacientes con diagnóstico de cancer Beningno y cuáles son Malignos?. Use el package ggplot2 para graficar un barplot con estos datos. 
+
+
+*Paso 3:* Preparación de los datos **(+ 15 puntos)**
+
+7. Teniendo en cuenta el número de valores nulos y NA del dataset, seleccione un método para que 
+   realizar la imputación de valores: i) Omitir los datos faltantes, ii) calcular la media de cada variable 
+   y asignar el el valor a los datos faltantes, iii) Usar la funcion MICE para hacer la imputación de valores
+   Nota: la selección del método dependerá la exactitud de modelo. 
+   
+8. Identifique y elimine los outliers(datos anormales, si aplica) Recomendación: use la boxplot del package ggplot2 .  
+9. Una vez realice los puntos anteriores, realice una resumen de sus datos y compruebe que su dataset está
+   lista para ser manipulada (use la función summary u otra para este caso). 
+
+10.La imputación de los valores faltantes o nulos afecto las distribución de los datos ?  Justifique su repuesta.
+
+*Paso 4:* Transformación de los datos **(+10 puntos)**
+
+11. Elimine la variable (ID), debido a que solo es el número de identificación del paciente
+12. Como puede observar, Las variables del data set tienen rangos numéricos muy diferentes, esto es, 
+    por ejemplo: la variable area_mean tiene valores entre (143.5 a 2501) y la variable symmetry_mean 
+    está entre (0.1167 - 0.30). En estos casos se debe realizar la estandarización de datos, es decir: 
+    i- Normalización y ii) escalamiento. Para el dataset realice la estandarizacion de los datos del dataset.
+    Puede usar la función [standardize](https://cran.r-project.org/web/packages/standardize/vignettes/using-standardize.html) o revisar [esta información](https://www.pluralsight.com/guides/normalizing-data-r)
+    
+*Paso 5:* Correlación entre las variables **(+25 puntos)**
+En esta sección encontraremos las varaibles que estan asociadas entre si. 
+
+```{r, message= FALSE, warning=FALSE, eval=FALSE}
+library(PerformanceAnalytics) # para usar chart.correlation, instalelo sino lo tiene.
+chart.Correlation(cancer[,c(3:11)],histogram=TRUE, col="grey10", pch=1, main="Cancer Mean")
+```
+
+Esta función no admite variables categoricas por tal razón debe omitir el outcome. Una vez encuentre un r (un valor de correlación) => 0.65,entonces estas variables estarán correlacionadas y puede decidir cual se queda en el data set o cual se elimina. 
+
+Use como ejemplo esto código para determinar la variables altamente correlacionadas. (Por favor modifiquelo según lo requiera y use el codigo según sus necesidades).
+
+```{r, eval=FALSE}
+# Nos aseguramos que nuestro resultados sean repetibles
+set.seed(5464)
+names(diabetes)
+str(diabetes)
+# Medir la correlación entre dos variables 
+cor(diabetes$Age, diabetes$Insulin, use = 'complete.obs')
+
+# Teniendo en cuenta la prueba de significancia y el valor de confianza 
+cor.test(diabetes$Age, diabetes$Glucose, use = 'complete.obs')
+
+# Calculamos la matrix de correlación para todo el dataframe
+correlationMatrix <- cor(diabetes[,1:8])  # Remover el outcome
+# Resumir la matrix de correlaciòn
+print(correlationMatrix)
+# encontrar variables que están altamente correlacionas (idealmente> 0,75)
+highlyCorrelated <- findCorrelation(correlationMatrix, cutoff=0.5)
+# Nombre de la variable(s) correlacionadas
+cat("Variable(s) correlacionada(s):",colnames(diabetes[highlyCorrelated]))
+
+# Eliminar las variables que no tienen fuerte asociacion con el outcome ............
+# Correlation Matrix     
+correlationMatrix <- cor(cancer[,3:31])                              # Select only numerical Variables
+hcorrelated       <- findCorrelation(correlationMatrix, cutoff=0.6)  # Threshold >0.6, Find Features that are highly corrected 
+print(hcorrelated)                                                   # print indexes of highly correlated attributes
+highly_cor_var    <- colnames(cancer[hcorrelated])                   # displaying highly correlated variables
+data.frame(highly_cor_var)
+
+```
+
+Igual forma puede realizar un analisis bivariado(entre 2 variables) usando la función ggplot2, ya sea mediante un scatterplot, boxplot etc. 
+
+Antes de implementar el modelo de regresión logística, 
+debe construir dos data set: i) uno con todas las variables iniciales, ya transformadas y limpias; ii) y otro con las variables que son altamente correlacionadas; en ambos data set deben incluir el outcome. 
+
+Use como ejemplo este código: (Modifiquelo)
+```{r, message=FALSE, warning=FALSE, eval = FALSE}
+# Split training data y test data 
+set.seed(899)   # Valores aleatorios
+inTrain <- createDataPartition(y=cancer$diagnosis, p = 0.80, list =FALSE)  # Split 80% y 20%
+train   <- cancer[inTrain,]
+test    <- cancer[-inTrain,]
+# Preparar el esquema de entrenamiento
+control <- trainControl(method="repeatedcv", number=10, repeats=3)
+
+# Tenga en cuenta que el dataset train, son los datos que entrenaran el modelo, y test son los datos para validarlo o evaluarlo
+```
+
+*Paso 6:* Implementación de los modelos **(+25 puntos)**
+
+Para esto puede usar el paquete Caret:
+
+13. Con el data set completo y limpio, realice la division del dataset de la siguiente forma: 
+    i)  80% de los datos para el entrenamiento del modelo (seleccionando las primeras 400 observaciones)
+    ii) 20% de los datos para la evaluación del modelo (seleccionando las ultimas  200 observaciones)
+14. Implemente los modelos de regresión logistica del paquete caret. 
+
+Aplique el código a continuación para los dos data sets (Modifiquelo si es necesario) 
+
+```{r, eval=FALSE}
+# Entrenamos en modelo de regresion logística ---
+set.seed(1156)
+logFit <- train(diagnosis ~.,
+                data = train,
+                method = 'glm',
+                preProc = c("center", "scale"),
+                trControl = control)
+```
+
+
+*Paso 6:* Evaluación del performance del modelo  **(+20 puntos)**
+
+15. Una vez apliquen las métricas para medir el performance (desempeño), esto es la matriz de confusión sobre los 
+    datos de evaluación (test). 
+    + Indique cuál de los dos modelos es más exacto en la detección de tipos de tumores? El modelo donde se uso todas las variables o el que se seleccionó las variables más significativas?
+    + Cúal modelo tiene menos errores en cuanto la deteccion de tumores benignos o malinos. 
+    + Qué indica la sensibilidad y especificidad en la evaluación de desempeño de los modelos de machine learning?
+    + Que los valores predictivos positivos y negativos en la metricas de evaluación?
+    + En un gráfico (barplot) muestre el porcentaje de pacientes detectados por el modelo de regresion  Vs los  
+      pacientes detectados por el KNN. 
+      
+Para esto puede usar (debe modificarlo) el siguiente código:
+
+```{r, eval= FALSE}
+# Validacion de los modelos 
+#  Model 1: Prediction with LogisticR ----
+predictionglm <- predict(logFit, newdata = x_test, type="prob")  # Probabilidad de que sea 1(no cumple)
+predglm01     <- ifelse(predictionglm > 0.5,"Malignant" ,"Benign")
+predglm01     <- as.factor(predglm01)
+length(predglm01)
+cancer$diagnosis
+dim(cancer)
+# AUC and CI   .................................. 
+print(aucglm   <- auc(test$diagnosis,predictionglm))
+print(ciaucglm <- ci.auc(test$diagnosis, predictionglm))
+rocglm          <-roc(test$diagnosis,predictionglm)$auc
+
+# Compute error  ................................
+confusionmatrix  <- table(predglm01, 
+                          test[,which(names(test) == "diagnosis")])
+```
+
+ 
+16 ¿Qué conclusiones puede sacar sobre el analisis de estos datos? ¿Cómo responde a la pregunta de investigación? 
+Exitos 
+   
+
+
+
+
+
+
+
+
+
+
