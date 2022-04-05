@@ -1,0 +1,489 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\title{2.1-Análisis exploratorio de datos (EDA)}
+\author{Jair Villanueva}
+\date{4/4/2022}
+
+\usepackage{amsmath,amssymb}
+\usepackage{lmodern}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\hypersetup{
+  pdftitle={2.1-Análisis exploratorio de datos (EDA)},
+  pdfauthor={Jair Villanueva},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+\urlstyle{same} % disable monospaced font for URLs
+\usepackage[margin=1in]{geometry}
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{graphicx}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\ifLuaTeX
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+
+\begin{document}
+\maketitle
+
+\hypertarget{anuxe1lisis-exploratorio-de-datos-eda}{%
+\subsubsection{Análisis Exploratorio de datos
+(EDA)}\label{anuxe1lisis-exploratorio-de-datos-eda}}
+
+\textbf{Definición:}
+
+Son técnicas estadísticas cuya finalidad es conseguir un entendimiento
+básico de los datos y de las relaciones existentes entre las variables
+analizadas de un dataset.
+
+\textbf{Objetivos del EDA}
+
+\begin{itemize}
+\tightlist
+\item
+  Organizar y preparar los datos
+\item
+  Detectar fallos en el diseño y recogida de los datos
+\item
+  Manejo de datos faltantes
+\item
+  Transformar/eliminar/agregar/ordenar datos
+\item
+  Identificación de casos atípicos (outliers)
+\item
+  Encontrar relaciones entre variables
+\item
+  Aplicar técnicas estadísticas para cada variable (Gráficas)
+\end{itemize}
+
+\hypertarget{introducciuxf3n}{%
+\subsubsection{Introducción}\label{introducciuxf3n}}
+
+Las enfermedades cardiovasculares (ECV) o enfermedades del corazón son
+la principal causa de muerte en todo el mundo con 17,9 millones de casos
+de muerte cada año . Las enfermedades cardiovasculares se deben a la
+hipertensión, la diabetes, el sobrepeso y los estilos de vida poco
+saludables. Puede leer más sobre las estadísticas de enfermedades
+cardíacas y las causas de la autocomprensión. Este proyecto cubre el
+análisis exploratorio de datos usando R. El conjunto de datos utilizado
+en este proyecto es el conjunto de datos de enfermedades cardíacas
+(``heart.csv''), y tanto los datos como el código para este proyecto
+están disponibles en mi repositorio de GitHub
+\href{Ew3006-DataSciencexHC}{https://github.com/jairvilla/EW3006\_DataSciencexHC.git}.
+
+\textbf{Información de las variables del dataset:}
+
+1)\textbf{age:} Age of the patient, in years 2)\textbf{sex:} (1= male, 0
+= female) 3)\textbf{cp:} chest pain type (4 values) Value 1: typical
+angina Value 2: atypical angina Value 3: non-anginal pain Value 4:
+asymptomatic 4)\textbf{trestbps} resting blood pressure 5)\textbf{chol:}
+serum cholestoral in mg/dl 6)\textbf{fbs:} fasting blood sugar
+\textgreater{} 120 mg/dl (1 = true, 0 = false) 7)\textbf{restecg:}
+resting electrocardiographic results (values 0,1,2) Value 0:normal,
+Value 1: having ST-T wave abnormality, Value 2: showing probable or
+definite left ventricular hypertropy by Estes 8)\textbf{thalach:}
+maximum heart rate achievecd 9)\textbf{exang:} exercise induced angina
+(1 = yes, 0 = no) 10)\textbf{oldpeak:} = ST depression induced by
+exercise relative to rest 11)\textbf{slope:} the slope of the peak
+exercise ST segment 12).ca: number of major vessels (0-3) colored by
+flourosopy 13\textbf{thal:} 3 = normal; 6 = fixed defect; 7 = reversable
+defect 14)\textbf{target:} Diagnoses of heart disease (Value 0:
+\textless50\% diameter narrowing, Value 1: \textgreater{} 50\% diameter
+narrowing)
+
+\hypertarget{cargar-el-dataset-heart.csv}{%
+\subsubsection{\texorpdfstring{Cargar el dataset:
+\emph{``heart.csv''}}{Cargar el dataset: ``heart.csv''}}\label{cargar-el-dataset-heart.csv}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{heart }\OtherTok{\textless{}{-}} \FunctionTok{read.csv}\NormalTok{(}\StringTok{"./data/heart.csv"}\NormalTok{, }\AttributeTok{sep =} \StringTok{";"}\NormalTok{, }\AttributeTok{header =} \ConstantTok{TRUE}\NormalTok{ )}
+\CommentTok{\# glimpse(heart)   \# Resumir los datos}
+\FunctionTok{summary}\NormalTok{(heart)     }\CommentTok{\# Estadistica descriptiva}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##        id             age             sex               cp       
+##  Min.   :  1.0   Min.   : 2.00   Min.   :0.0000   Min.   :1.000  
+##  1st Qu.: 76.5   1st Qu.:47.00   1st Qu.:0.0000   1st Qu.:3.000  
+##  Median :152.0   Median :55.00   Median :1.0000   Median :3.000  
+##  Mean   :152.0   Mean   :54.11   Mean   :0.6799   Mean   :3.158  
+##  3rd Qu.:227.5   3rd Qu.:61.00   3rd Qu.:1.0000   3rd Qu.:4.000  
+##  Max.   :303.0   Max.   :77.00   Max.   :1.0000   Max.   :4.000  
+##                  NA's   :10                                      
+##     trestbps           chol            fbs            restecg      
+##  Min.   :  94.0   Min.   :126.0   Min.   :0.0000   Min.   :0.0000  
+##  1st Qu.: 120.0   1st Qu.:212.0   1st Qu.:0.0000   1st Qu.:0.0000  
+##  Median : 130.0   Median :243.0   Median :0.0000   Median :1.0000  
+##  Mean   : 145.9   Mean   :247.8   Mean   :0.1485   Mean   :0.9901  
+##  3rd Qu.: 140.0   3rd Qu.:277.0   3rd Qu.:0.0000   3rd Qu.:2.0000  
+##  Max.   :2000.0   Max.   :564.0   Max.   :1.0000   Max.   :2.0000  
+##  NA's   :10       NA's   :20                                       
+##     thalach           exang           oldpeak         slope      
+##  Min.   :  22.0   Min.   :0.0000   Min.   :0.00   Min.   :1.000  
+##  1st Qu.: 133.0   1st Qu.:0.0000   1st Qu.:0.00   1st Qu.:1.000  
+##  Median : 153.0   Median :0.0000   Median :0.80   Median :2.000  
+##  Mean   : 161.9   Mean   :0.3267   Mean   :1.04   Mean   :1.601  
+##  3rd Qu.: 166.0   3rd Qu.:1.0000   3rd Qu.:1.60   3rd Qu.:2.000  
+##  Max.   :1710.0   Max.   :1.0000   Max.   :6.20   Max.   :3.000  
+##  NA's   :10                                                      
+##        ca                 thal                diag       
+##  Min.   :-100000.0   Min.   :-100000.0   Min.   :0.0000  
+##  1st Qu.:      0.0   1st Qu.:      3.0   1st Qu.:0.0000  
+##  Median :      0.0   Median :      3.0   Median :0.0000  
+##  Mean   :   -659.2   Mean   :   -655.4   Mean   :0.4587  
+##  3rd Qu.:      1.0   3rd Qu.:      7.0   3rd Qu.:1.0000  
+##  Max.   :      4.0   Max.   :      7.0   Max.   :1.0000  
+## 
+\end{verbatim}
+
+Teniendo en cuenta el tipo de variables del dataset, se observa que
+algunas varibles son tipo categoricas (\emph{sex},
+\emph{ca},\emph{diag}) y otros son
+numéricas(\emph{age},\emph{chol},\emph{\ldots{}}). Sin embargo, el
+análisis previo muestra todas las variables como númericas.
+
+\hypertarget{manipulaciuxf3n-de-las-variables}{%
+\paragraph{Manipulación de las
+variables}\label{manipulaciuxf3n-de-las-variables}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Identificar datos faltantes}
+\FunctionTok{sum}\NormalTok{(}\FunctionTok{is.na}\NormalTok{(heart))      }\CommentTok{\# Cuenta el total de NAs del dataset}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 50
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{colSums}\NormalTok{(}\FunctionTok{is.na}\NormalTok{(heart))  }\CommentTok{\# Calcular el total de NA de cada variable }
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##       id      age      sex       cp trestbps     chol      fbs  restecg 
+##        0       10        0        0       10       20        0        0 
+##  thalach    exang  oldpeak    slope       ca     thal     diag 
+##       10        0        0        0        0        0        0
+\end{verbatim}
+
+\hypertarget{identificaciuxf3n-de-outliers}{%
+\subsubsection{\texorpdfstring{Identificación de
+\emph{``outliers''}:}{Identificación de ``outliers'':}}\label{identificaciuxf3n-de-outliers}}
+
+La variable trestbps(presión arterial) tiene un valor máx de 2000, lo
+cual es atípico. Por esta razón debemos, reemplazar los outliers por la
+media o por un valor más racional.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(outliers)        }\CommentTok{\# librería }
+\FunctionTok{summary}\NormalTok{(heart)           }\CommentTok{\# Resumen de los datos}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##        id             age             sex               cp       
+##  Min.   :  1.0   Min.   : 2.00   Min.   :0.0000   Min.   :1.000  
+##  1st Qu.: 76.5   1st Qu.:47.00   1st Qu.:0.0000   1st Qu.:3.000  
+##  Median :152.0   Median :55.00   Median :1.0000   Median :3.000  
+##  Mean   :152.0   Mean   :54.11   Mean   :0.6799   Mean   :3.158  
+##  3rd Qu.:227.5   3rd Qu.:61.00   3rd Qu.:1.0000   3rd Qu.:4.000  
+##  Max.   :303.0   Max.   :77.00   Max.   :1.0000   Max.   :4.000  
+##                  NA's   :10                                      
+##     trestbps           chol            fbs            restecg      
+##  Min.   :  94.0   Min.   :126.0   Min.   :0.0000   Min.   :0.0000  
+##  1st Qu.: 120.0   1st Qu.:212.0   1st Qu.:0.0000   1st Qu.:0.0000  
+##  Median : 130.0   Median :243.0   Median :0.0000   Median :1.0000  
+##  Mean   : 145.9   Mean   :247.8   Mean   :0.1485   Mean   :0.9901  
+##  3rd Qu.: 140.0   3rd Qu.:277.0   3rd Qu.:0.0000   3rd Qu.:2.0000  
+##  Max.   :2000.0   Max.   :564.0   Max.   :1.0000   Max.   :2.0000  
+##  NA's   :10       NA's   :20                                       
+##     thalach           exang           oldpeak         slope      
+##  Min.   :  22.0   Min.   :0.0000   Min.   :0.00   Min.   :1.000  
+##  1st Qu.: 133.0   1st Qu.:0.0000   1st Qu.:0.00   1st Qu.:1.000  
+##  Median : 153.0   Median :0.0000   Median :0.80   Median :2.000  
+##  Mean   : 161.9   Mean   :0.3267   Mean   :1.04   Mean   :1.601  
+##  3rd Qu.: 166.0   3rd Qu.:1.0000   3rd Qu.:1.60   3rd Qu.:2.000  
+##  Max.   :1710.0   Max.   :1.0000   Max.   :6.20   Max.   :3.000  
+##  NA's   :10                                                      
+##        ca                 thal                diag       
+##  Min.   :-100000.0   Min.   :-100000.0   Min.   :0.0000  
+##  1st Qu.:      0.0   1st Qu.:      3.0   1st Qu.:0.0000  
+##  Median :      0.0   Median :      3.0   Median :0.0000  
+##  Mean   :   -659.2   Mean   :   -655.4   Mean   :0.4587  
+##  3rd Qu.:      1.0   3rd Qu.:      7.0   3rd Qu.:1.0000  
+##  Max.   :      4.0   Max.   :      7.0   Max.   :1.0000  
+## 
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{outlier}\NormalTok{(heart}\SpecialCharTok{$}\NormalTok{trestbps)  }\CommentTok{\# Identificar posibles valores atípicos de cada variable.}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 2000
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{outlier}\NormalTok{(heart}\SpecialCharTok{$}\NormalTok{thalach)   }
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 1710
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{outlier}\NormalTok{(heart}\SpecialCharTok{$}\NormalTok{thal)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] -1e+05
+\end{verbatim}
+
+\textbf{Preguntas:} * 1. ¿Cuáles variables del dataset presentan
+outliers?\\
+* 2. ¿Cuántos valores faltantes hay en el conjunto de datos
+\emph{heart}? * 3. ¿En qué variables se concentran los valores
+faltantes? * 4. ¿Cómo imputaría la media o la mediana de estos valores?
+
+\hypertarget{identificar-outliers-usando-boxplot}{%
+\subsubsection{Identificar Outliers usando
+boxplot:}\label{identificar-outliers-usando-boxplot}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# variable trestbps}
+\NormalTok{outlier\_v1 }\OtherTok{\textless{}{-}} \FunctionTok{boxplot}\NormalTok{(heart}\SpecialCharTok{$}\NormalTok{trestbps, }\AttributeTok{col=}\StringTok{"skyblue"}\NormalTok{, }\AttributeTok{frame.plot=} \ConstantTok{FALSE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{11--EDA-Heart_files/figure-latex/unnamed-chunk-4-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{outlier\_v1}\SpecialCharTok{$}\NormalTok{out}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##  [1]  172 1500 1120  180 2000  174  178  192  180  178  180
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# variable Thal}
+\NormalTok{outlier\_v2 }\OtherTok{\textless{}{-}} \FunctionTok{boxplot}\NormalTok{(heart}\SpecialCharTok{$}\NormalTok{thal, }\AttributeTok{col=}\StringTok{"skyblue"}\NormalTok{, }\AttributeTok{frame.plot=} \ConstantTok{FALSE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{11--EDA-Heart_files/figure-latex/unnamed-chunk-4-2.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{outlier\_v2}\SpecialCharTok{$}\NormalTok{out   }\CommentTok{\# Cuantos}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] -1e+05 -1e+05
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Entonces para eliminar los outliers usamos el operador pertenece \%in\% que funciona igual que el símbolo matemático ∈ que se usa en la teoría de conjuntos.}
+\CommentTok{\# heart \textless{}{-}heart[!(heart$trestbps \%in\% outlier\_var$out),]  \# Eliminar los outliers}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{manejo-de-outliers}{%
+\subsubsection{Manejo de Outliers:}\label{manejo-de-outliers}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# variable thalach  }
+\CommentTok{\# La variable *thalach* tiene un valor atípico de 1710 y 22:}
+\NormalTok{heart}\SpecialCharTok{$}\NormalTok{thalach }\OtherTok{\textless{}{-}} \FunctionTok{ifelse}\NormalTok{(heart}\SpecialCharTok{$}\NormalTok{thalach }\SpecialCharTok{\textgreater{}=} \DecValTok{250} \SpecialCharTok{|}\NormalTok{ heart}\SpecialCharTok{$}\NormalTok{thalach }\SpecialCharTok{\textless{}} \DecValTok{30}\NormalTok{,}
+                        \FunctionTok{mean}\NormalTok{(heart}\SpecialCharTok{$}\NormalTok{thalach),heart}\SpecialCharTok{$}\NormalTok{thalach)}
+
+\CommentTok{\# variable thal: 3: normal, 6 fixed detect, 7:reversable defect  }
+
+\NormalTok{heart}\SpecialCharTok{$}\NormalTok{thal }\OtherTok{\textless{}{-}} \FunctionTok{factor}\NormalTok{(heart}\SpecialCharTok{$}\NormalTok{thal)}
+\FunctionTok{str}\NormalTok{(heart}\SpecialCharTok{$}\NormalTok{thal)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##  Factor w/ 4 levels "-1e+05","3","6",..: 3 2 4 2 2 2 2 2 4 4 ...
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{heart}\SpecialCharTok{$}\NormalTok{thal }\OtherTok{\textless{}{-}} \FunctionTok{ifelse}\NormalTok{(heart}\SpecialCharTok{$}\NormalTok{thal }\SpecialCharTok{\textless{}=} \SpecialCharTok{{-}}\DecValTok{700}\NormalTok{,}
+                        \FunctionTok{mode}\NormalTok{(heart}\SpecialCharTok{$}\NormalTok{thal),heart}\SpecialCharTok{$}\NormalTok{thal)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning in Ops.factor(heart$thal, -700): '<=' not meaningful for factors
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Imputación de mean en NAs }
+\CommentTok{\#heart$age[is.na(heart$age)]\textless{}{-} round(mean(heart$age, na.rm = TRUE))}
+\CommentTok{\#heart$chol[is.na(heart$chol)]\textless{}{-} round (mean(heart$chol, na.rm = TRUE))}
+\CommentTok{\#heart$trestbps[is.na(heart$chol)]\textless{}{-} round (mean(heart$chol, na.rm = TRUE))}
+\CommentTok{\#heart$chol[is.na(heart$chol)]\textless{}{-} round (mean(heart$chol, na.rm = TRUE))}
+
+
+\CommentTok{\#heart\_mod \textless{}{-} heart \%\textgreater{}\%}
+\CommentTok{\#  dplyr::select({-}id)\%\textgreater{}\%     \# Eliminar Variable id }
+\end{Highlighting}
+\end{Shaded}
+
+\textbf{Avanzado:} Creando un ciclo for
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ControlFlowTok{for}\NormalTok{(i }\ControlFlowTok{in} \DecValTok{1}\SpecialCharTok{:}\FunctionTok{ncol}\NormalTok{(heart))\{}
+\NormalTok{  heart[}\FunctionTok{is.na}\NormalTok{(heart[,i]), i] }\OtherTok{\textless{}{-}} \FunctionTok{mean}\NormalTok{(heart[,i], }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{)}
+\NormalTok{    \}}
+\FunctionTok{summary}\NormalTok{(heart)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##        id             age             sex               cp       
+##  Min.   :  1.0   Min.   : 2.00   Min.   :0.0000   Min.   :1.000  
+##  1st Qu.: 76.5   1st Qu.:47.50   1st Qu.:0.0000   1st Qu.:3.000  
+##  Median :152.0   Median :55.00   Median :1.0000   Median :3.000  
+##  Mean   :152.0   Mean   :54.11   Mean   :0.6799   Mean   :3.158  
+##  3rd Qu.:227.5   3rd Qu.:61.00   3rd Qu.:1.0000   3rd Qu.:4.000  
+##  Max.   :303.0   Max.   :77.00   Max.   :1.0000   Max.   :4.000  
+##                                                                  
+##     trestbps           chol            fbs            restecg      
+##  Min.   :  94.0   Min.   :126.0   Min.   :0.0000   Min.   :0.0000  
+##  1st Qu.: 120.0   1st Qu.:214.0   1st Qu.:0.0000   1st Qu.:0.0000  
+##  Median : 130.0   Median :246.0   Median :0.0000   Median :1.0000  
+##  Mean   : 145.9   Mean   :247.8   Mean   :0.1485   Mean   :0.9901  
+##  3rd Qu.: 140.0   3rd Qu.:274.0   3rd Qu.:0.0000   3rd Qu.:2.0000  
+##  Max.   :2000.0   Max.   :564.0   Max.   :1.0000   Max.   :2.0000  
+##                                                                    
+##     thalach          exang           oldpeak         slope      
+##  Min.   : 71.0   Min.   :0.0000   Min.   :0.00   Min.   :1.000  
+##  1st Qu.:136.0   1st Qu.:0.0000   1st Qu.:0.00   1st Qu.:1.000  
+##  Median :152.0   Median :0.0000   Median :0.80   Median :2.000  
+##  Mean   :149.4   Mean   :0.3267   Mean   :1.04   Mean   :1.601  
+##  3rd Qu.:165.0   3rd Qu.:1.0000   3rd Qu.:1.60   3rd Qu.:2.000  
+##  Max.   :202.0   Max.   :1.0000   Max.   :6.20   Max.   :3.000  
+##                                                                 
+##        ca                 thal          diag       
+##  Min.   :-100000.0   Min.   : NA   Min.   :0.0000  
+##  1st Qu.:      0.0   1st Qu.: NA   1st Qu.:0.0000  
+##  Median :      0.0   Median : NA   Median :0.0000  
+##  Mean   :   -659.2   Mean   :NaN   Mean   :0.4587  
+##  3rd Qu.:      1.0   3rd Qu.: NA   3rd Qu.:1.0000  
+##  Max.   :      4.0   Max.   : NA   Max.   :1.0000  
+##                      NA's   :303
+\end{verbatim}
+
+Note that the \texttt{echo\ =\ FALSE} parameter was added to the code
+chunk to prevent printing of the R code that generated the plot.
+
+\end{document}

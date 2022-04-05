@@ -2,7 +2,9 @@
 title: "2.1-Análisis exploratorio de datos (EDA)"
 author: "Jair Villanueva"
 date: "4/4/2022"
-output: html_document
+output:
+  html_document: default
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -29,40 +31,76 @@ Son técnicas estadísticas cuya finalidad es conseguir un entendimiento básico
 
 Las enfermedades cardiovasculares (ECV) o enfermedades del corazón son la principal causa de muerte en todo el mundo con 17,9 millones de casos de muerte cada año . Las enfermedades cardiovasculares se deben a la hipertensión, la diabetes, el sobrepeso y los estilos de vida poco saludables. Puede leer más sobre las estadísticas de enfermedades cardíacas y las causas de la autocomprensión. Este proyecto cubre el análisis exploratorio de datos usando R. El conjunto de datos utilizado en este proyecto es el conjunto de datos de enfermedades cardíacas ("heart.csv"), y tanto los datos como el código para este proyecto están disponibles en mi repositorio de GitHub [https://github.com/jairvilla/EW3006_DataSciencexHC.git](Ew3006-DataSciencexHC).
 
+**Información de las variables del dataset:**
 
-```{r, enviroment set up warning = FALSE, message = FALSE }
-# Instalar package
+1)**age:** Age of the patient, in years
+
+2)**sex:** (1= male, 0 = female)
+
+3)**cp:** chest pain type (4 values) Value 1: typical angina Value 2: atypical angina Value 3: non-anginal              pain Value 4: asymptomatic
+
+4)**trestbps** resting blood pressure
+
+5)**chol:** serum cholestoral in mg/dl
+
+6)**fbs:**  fasting blood sugar > 120 mg/dl (1 = true, 0 = false)
+
+7)**restecg:** resting electrocardiographic results (values 0,1,2) Value 0:normal, Value 1: having ST-T wave                abnormality, Value 2: showing probable or definite left ventricular hypertropy by Estes
+
+8)**thalach:** maximum heart rate achievecd
+
+9)**exang:** exercise induced angina (1 = yes, 0 = no)
+
+10)**oldpeak:** = ST depression induced by exercise relative to rest
+
+11)**slope:** the slope of the peak exercise ST segment 12).ca: number of major vessels (0-3) colored by flourosopy 
+
+13)**thal:** 3 = normal; 6 = fixed defect; 7 = reversable defect
+
+14)**ca:** The number of major vessel (0-3) 
+
+15)**diagnosis:** Diagnoses of heart disease (Value 0: no, Value 1: yes)
+
+```{r warning = FALSE, message = FALSE, error = FALSE, include = FALSE}
+# Instalar package ....
 # if(!require(outliers)) install.packages("outliers") # Para instalar packages 
 
-# Librerías
-lib <- c("dplyr","tidyverse","ggplot2","readr", "outliers")   # Incluir las lib que se requieran
-lapply(lib, require, character.only = TRUE)
+# Librerías ...........
+# lib <- c("dplyr","tidyverse","ggplot2","readr", "outliers")   # Incluir las lib que se requieran
+# lapply(lib, require, character.only = TRUE)                   
 
-# Otra forma
+# Otra forma .........
 library(dplyr); library(outliers)
+library(ggplot2);library(readr)
+library(tidyverse)
+
+# Directorio de trabajo.......
+setwd("C:/Users/jair.villanueva94/Documents/3- Backup2022/4- Faculty/EW3006_DataSciencexHC")
 
 ```
 
 
-### Cargar el dataset: *"heart.csv"*
+### Dataset: *"heart.csv"*
 
-```{r heart}
-heart <-read.csv("data/heart.csv", sep = ";", header = TRUE )
-glimpse(heart)   # Resumir los datos
-summary(heart)
+Los datos de enfermedades cardíacas están disponibles en [UCI](https://archive.ics.uci.edu/ml/machine-learning-databases/heart-disease/processed.cleveland.data).
+La descripción de la base de datos se puede encontrar [ aquí](https://archive.ics.uci.edu/ml/machine-learning-databases/heart-disease/heart-disease.names). 
+
+```{r, heart, eval = TRUE}
+heart <- read.csv("./data/heart.csv", sep = ";", header = TRUE )
+# glimpse(heart)   # Resumir los datos
+head(heart, 5)
+str(heart)
+
 ```
 
 Teniendo en cuenta el tipo de variables del dataset, se observa que algunas varibles son tipo categoricas (*sex*, *ca*,*diag*) y otros son numéricas(*age*,*chol*,*...*).
 Sin embargo, el análisis previo muestra todas las variables como númericas.
 
-#### Manipulación de las variables
+### Preparación de los datos
 
-```{r}
-# Identificar datos faltantes
-sum(is.na(heart))      # Contar total de NAs del dataset
-colSums(is.na(heart))  # Calcular el total de NA de cada variable 
-is.na(heart$age)      # Identificar los NA en una columna específica
-
+```{r, eval=TRUE}
+summary(heart)     # Vistazo a los datos 
+# glimpse(heart)   # Estadistica descriptiva
 ```
 
 ### Identificación de *"outliers"*:
@@ -71,9 +109,8 @@ La variable trestbps(presión arterial) tiene un valor máx de 2000,
 lo cual es atípico. Por esta razón debemos, reemplazar los outliers 
 por la media o por un valor más racional.
 
-```{r heart }
+```{r }
 library(outliers)        # librería 
-summary(heart)           # Resumen de los datos
 outlier(heart$trestbps)  # Identificar posibles valores atípicos de cada variable.
 outlier(heart$thalach)   
 outlier(heart$thal)
@@ -98,8 +135,9 @@ outlier_v2 <- boxplot(heart$thal, col="skyblue", frame.plot= FALSE)
 outlier_v2$out   # Cuantos
 
 # Entonces para eliminar los outliers usamos el operador pertenece %in% que funciona igual que el símbolo matemático ∈ que se usa en la teoría de conjuntos.
-heart <-heart[!(heart$trestbps %in% outlier_var$out),]  # Eliminar los outliers
+# heart <-heart[!(heart$trestbps %in% outlier_var$out),]  # Eliminar los outliers
 ```
+
 
 ### Manejo de Outliers: 
 
@@ -110,43 +148,67 @@ heart$thalach <- ifelse(heart$thalach >= 250 | heart$thalach < 30,
                         mean(heart$thalach),heart$thalach)
 
 # variable thal: 3: normal, 6 fixed detect, 7:reversable defect  
-
+heart$thal <- ifelse(heart$thal == -10000,7,heart$thal)
 heart$thal <- factor(heart$thal)
-str(heart$thal)
-heart$thal <- ifelse(heart$thal <= -700,
-                        mode(heart$thal),heart$thal)
 
+# Variable  ca ...... (0-3)
+heart$ca <- ifelse(heart$ca == -100000, 4, heart$ca)
+heart$ca <- ifelse(heart$ca == 4, 1, heart$ca)
+
+
+# Variable age .....  
+heart$age <- ifelse(heart$age <= 18,mean(heart$age, na.rm = TRUE),heart$age)
+
+# Variable trestbps  
+heart$trestbps <- ifelse(heart$trestbps >=1000 ,mean(heart$trestbps, na.rm = TRUE),heart$trestbps)
+
+
+# Comprobación
+summary(heart)
 ```
 
-
-
-
-
+### Manejo de NAs:
+**Identificar NA:**
 ```{r}
+colSums(is.na(heart))
+```
+
+**Imputación de la media**
+
+```{r na}
 # Imputación de mean en NAs 
 heart$age[is.na(heart$age)]<- round(mean(heart$age, na.rm = TRUE))
 heart$chol[is.na(heart$chol)]<- round (mean(heart$chol, na.rm = TRUE))
-heart$trestbps[is.na(heart$chol)]<- round (mean(heart$chol, na.rm = TRUE))
-heart$chol[is.na(heart$chol)]<- round (mean(heart$chol, na.rm = TRUE))
+heart$trestbps[is.na(heart$trestbps)] <- round (mean(heart$trestbps, na.rm = TRUE))
+heart$thalach[is.na(heart$thalach)]<- round (mean(heart$thalach, na.rm = TRUE))
 
-
-heart_mod <- heart %>%
-  dplyr::select(-id)%>%     # Eliminar Variable id 
+summary(heart)
   
 ```
 
 
+### Convertir variables a factores 
+
+```{r}
+heart_mod <- heart%>%
+  mutate(cp = as.factor(cp),
+         restecg = as.factor(restecg),
+         slope = as.factor(slope),
+         thal = as.factor(thal)
+  )
+str(heart_mod)
+```
 
 
 **Avanzado:** Creando un ciclo for
 
 ```{r}
-for(i in 1:ncol(heart)){
-  heart[is.na(heart[,i]), i] <- mean(heart[,i], na.rm = TRUE)
-    }
-summary(heart)
+# for(i in 1:ncol(heart)){
+  #heart[is.na(heart[,i]), i] <- mean(heart[,i], na.rm = TRUE)
+   # }
+#summary(heart)
 
 ```
 
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+

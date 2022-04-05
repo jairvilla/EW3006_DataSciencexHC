@@ -8,6 +8,7 @@
 install.packages("corrplot")
 install.packages("reshape2")
 
+getwd()
 
 # Librerias  ----
 
@@ -15,7 +16,6 @@ library(tidyverse); library(ggplot2);library(corrplot)
 library(readr); library(dplyr); library(reshape2)  
 
 # Cargar datos ----
-
 getwd()
 setwd("C:/Users/jvill/Desktop/DataScience-2021/data") # Asigna la ruta a una variable que crearemos "dataset"
 filename <- "diabetes2.csv"                          # define el filename
